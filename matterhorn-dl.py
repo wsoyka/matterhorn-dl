@@ -19,6 +19,7 @@ Can download videos from
 Not properly tested. No known bugs. Give correct input -> profit.
 """
 
+
 # BEWARE: html is of lxml.html type, not string! #
 
 
@@ -43,11 +44,26 @@ class NoVideoFound(Exception):
 
 
 # remember this is not secure in anyway. its just the tuwel login though so......
+# OVERWRITTEN BY ANYTHING YOU PUT INTO data.py
 auth = {
-    "name": "", #martrikel nr
-    "pw": "", #tu pw
+    "name": "",  # martrikel nr
+    "pw": "",  # tu pw
     "app": "36"  # required
 }
+
+# import login data from data.py file (unsecure)
+# IF data.py CONTAINS VALUES WILL OVERWRITE ANYTHING SET PREVIOUSLY
+try:
+    pr_info("Trying to fetch login data")
+    import data as login
+
+    if login.name is "" or login.pw is "":
+        raise AttributeError
+    auth['name'] = login.name
+    auth['pw'] = login.pw
+except (ImportError, AttributeError) as e:
+    # loading from external didn't work. doesn't matter
+    pr_info("Fetching login data failed. No Data set.")
 
 
 def pr_verbose(message):
@@ -93,6 +109,7 @@ def login():
         headers=dict(referer=login_url)
     )
     if "Sie sind nicht angemeldet." in result.text:
+        print("nicht ang")
         return None
     return session
 
@@ -201,10 +218,10 @@ def download(session, url, append_filename="", out_dir=None):
     if append_filename is "":
         append_filename = etr.find(".//title").text
 
-    todownload = etr.find(".//url").text
-    pr_verbose("[DOWNLOADING]: " + todownload)
+    to_download = etr.find(".//url").text
+    pr_verbose("[DOWNLOADING]: " + to_download)
 
-    filename, extension = path.splitext(path.basename(todownload))
+    filename, extension = path.splitext(path.basename(to_download))
     filename += "_" + append_filename + extension  # add additional info (lecture title) to filename
     filename = unidecode(filename)  # remove non ascii characters and replace with closest match
     filename = filename.replace(" ", "_")  # replace whitespaces for filesystem
@@ -213,7 +230,7 @@ def download(session, url, append_filename="", out_dir=None):
     if out_dir is None:
         out_dir = ""
 
-    bash_command = "wget -c " + todownload + " -O " + out_dir + filename
+    bash_command = "wget -c " + to_download + " -O " + out_dir + filename
     import subprocess
 
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
