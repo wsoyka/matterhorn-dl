@@ -53,6 +53,9 @@ auth = {
 
 # import login data from data.py file (unsecure)
 # IF data.py CONTAINS VALUES WILL OVERWRITE ANYTHING SET PREVIOUSLY
+# if you want to use data.py just create the file and write the following 2 lines to it without '#' ofc:
+# name="your matnr"
+# pw="your pw"
 try:
     pr_info("Trying to fetch login data")
     import data as login
